@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CadastroSheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fffef9;
+    --surface2: #eee8d8;
+    --border: #d4c9b0;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --accent3: #27ae60;
+    --ink: #1a1208;
+    --muted: #8a7a5a;
+    --shadow: rgba(26,18,8,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,120,0.15) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(180,160,120,0.08) 28px);
+  }
+  header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 1.2rem 3rem;
+    display: flex; align-items: center; gap: 1.5rem;
+    box-shadow: 0 4px 20px var(--shadow);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem;
+    letter-spacing: -0.03em; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .logo-dot {
+    width: 10px; height: 10px; background: var(--accent2);
+    border-radius: 50%; display: inline-block; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)}
+  }
+  .header-tag {
+    font-size: 0.65rem; color: rgba(245,240,232,0.4);
+    margin-left: auto; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+  .stats-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+  .stat {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.8rem 1rem; text-align: center;
+  }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 0.3rem; }
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
+  @media(max-width:800px){ .grid{grid-template-columns:1fr} header{padding:1rem 1.5rem} .container{padding:2rem 1rem} }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow); animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .card-header {
+    background: var(--ink); color: var(--bg);
+    padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.6rem;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .card-body { padding: 1.5rem; }
+  .form-group { margin-bottom: 1.2rem; }
+  label {
+    display: block; font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.4rem; font-weight: 500;
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 0.7rem 1rem; color: var(--ink);
+    font-family: 'DM Mono', monospace; font-size: 0.85rem; outline: none; transition: all 0.2s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--accent); background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+  input::placeholder { color: var(--muted); opacity: 0.5; }
+  .id-preview {
+    background: var(--surface2); border: 1.5px dashed var(--border);
+    border-radius: 8px; padding: 0.7rem 1rem;
+    font-size: 0.85rem; color: var(--muted); font-style: italic;
+  }
+
+  /* FILE UPLOAD */
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: 10px;
+    padding: 1.2rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--surface2); position: relative;
+  }
+  .upload-area:hover, .upload-area.dragover {
+    border-color: var(--accent); background: rgba(192,57,43,0.04);
+  }
+  .upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 1.8rem; margin-bottom: 0.3rem; opacity: 0.5; }
+  .upload-text { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+  .upload-text strong { color: var(--ink); }
+  .file-preview-wrap {
+    margin-top: 0.8rem; display: none;
+    border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; position: relative;
+  }
+  .file-preview-wrap.active { display: block; }
+  .file-preview-img { width: 100%; max-height: 160px; object-fit: cover; display: block; }
+  .file-preview-doc {
+    padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.7rem;
+    background: var(--surface2); font-size: 0.78rem;
+  }
+  .file-preview-doc .doc-icon { font-size: 1.5rem; }
+  .file-preview-doc .doc-name { color: var(--ink); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-preview-doc .doc-size { color: var(--muted); font-size: 0.7rem; }
+  .btn-remove-file {
+    position: absolute; top: 0.4rem; right: 0.4rem;
+    background: rgba(26,18,8,0.7); color: white;
+    border: none; border-radius: 50%; width: 22px; height: 22px;
+    font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .btn-remove-file:hover { background: var(--accent2); }
+
+  .btn {
+    width: 100%; padding: 0.85rem; border: none; border-radius: 8px;
+    font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,57,43,0.3); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .search-bar input { flex: 1; }
+  .btn-search {
+    background: var(--ink); color: var(--bg); border: none; border-radius: 8px;
+    padding: 0.7rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-search:hover { background: var(--accent); }
+
+  /* TABLE */
+  .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 0.8rem 1rem; text-align: left; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+    border-bottom: 1px solid var(--border); font-weight: 500; white-space: nowrap;
+  }
+  td { padding: 0.7rem 1rem; border-bottom: 1px solid rgba(212,201,176,0.5); transition: background 0.15s; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .id-badge {
+    background: var(--ink); color: var(--bg); border-radius: 4px;
+    padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 600; display: inline-block;
+  }
+  .age-chip {
+    background: rgba(39,174,96,0.12); color: var(--accent3);
+    border: 1px solid rgba(39,174,96,0.3); border-radius: 20px;
+    padding: 0.15rem 0.6rem; font-size: 0.72rem; display: inline-block;
+  }
+
+  /* THUMBNAIL IN TABLE */
+  .thumb-wrap { width: 44px; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; transition: transform 0.2s; }
+  .thumb-wrap img:hover { transform: scale(1.08); }
+  .thumb-doc {
+    width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; cursor: pointer; transition: background 0.2s;
+  }
+  .thumb-doc:hover { background: var(--border); }
+  .thumb-empty { width: 44px; height: 44px; border-radius: 6px; border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--border); font-size: 1rem; }
+
+  .actions { display: flex; gap: 0.4rem; }
+  .btn-icon {
+    border: none; border-radius: 6px; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; transition: all 0.15s; flex-shrink: 0;
+  }
+  .btn-edit { background: rgba(39,174,96,0.12); color: var(--accent3); border: 1px solid rgba(39,174,96,0.25); }
+  .btn-edit:hover { background: var(--accent3); color: white; transform: scale(1.1); }
+  .btn-delete { background: rgba(231,76,60,0.1); color: var(--accent2); border: 1px solid rgba(231,76,60,0.25); }
+  .btn-delete:hover { background: var(--accent2); color: white; transform: scale(1.1); }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.8rem; }
+  .loading { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* UPLOAD PROGRESS */
+  .upload-progress { margin-top: 0.5rem; display: none; }
+  .upload-progress.active { display: block; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent3); border-radius: 2px; transition: width 0.3s; width: 0%; }
+  .progress-label { font-size: 0.65rem; color: var(--muted); margin-top: 0.3rem; text-align: center; }
+
+  /* MODAL EDIT */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(26,18,8,0.6); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    width: 100%; max-width: 440px; margin: 1rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalUp 0.25s ease; overflow: hidden;
+  }
+  @keyframes modalUp { from{opacity:0;transform:translateY(20px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .modal-header {
+    background: var(--ink); color: var(--bg); padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .modal-close {
+    background: rgba(255,255,255,0.1); border: none; color: var(--bg);
+    border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
+    font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+  }
+  .modal-close:hover { background: var(--accent2); }
+  .modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
+  .modal-footer { padding: 0 1.5rem 1.5rem; display: flex; gap: 0.7rem; }
+  .btn-cancel {
+    flex: 1; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px;
+    background: transparent; color: var(--muted); font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-save {
+    flex: 2; padding: 0.75rem; border: none; border-radius: 8px;
+    background: var(--accent3); color: white; font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .btn-save:hover { background: #219a52; transform: translateY(-1px); }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* CONFIRM DELETE */
+  .confirm-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(26,18,8,0.6); backdrop-filter: blur(4px);
+    z-index: 300; align-items: center; justify-content: center;
+  }
+  .confirm-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+  .confirm-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    width: 100%; max-width: 340px; margin: 1rem; padding: 2rem; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalUp 0.25s ease;
+  }
+  .confirm-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .confirm-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .confirm-msg { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+  .confirm-btns { display: flex; gap: 0.7rem; }
+  .btn-confirm-cancel {
+    flex: 1; padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 8px;
+    background: transparent; color: var(--muted); font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-confirm-cancel:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-confirm-delete {
+    flex: 1; padding: 0.75rem; border: none; border-radius: 8px;
+    background: var(--accent2); color: white; font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  }
+  .btn-confirm-delete:hover { background: var(--accent); }
+  .btn-confirm-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* LIGHTBOX */
+  .lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 500;
+    align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  .lightbox.active { display: flex; animation: fadeIn 0.2s ease; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+  .lightbox-close {
+    position: fixed; top: 1.5rem; right: 1.5rem;
+    background: rgba(255,255,255,0.15); border: none; color: white;
+    border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .lightbox-close:hover { background: var(--accent2); }
+
+  /* TOAST */
+  .toast-container { position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 999; }
+  .toast {
+    background: var(--ink); color: var(--bg); padding: 0.8rem 1.2rem; border-radius: 8px;
+    font-size: 0.78rem; display: flex; align-items: center; gap: 0.6rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: toastIn 0.3s ease; max-width: 300px;
+  }
+  .toast.success { border-left: 3px solid var(--accent3); }
+  .toast.error { border-left: 3px solid var(--accent2); }
+  @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+  /* CURRENT FILE in edit modal */
+  .current-file {
+    display: flex; align-items: center; gap: 0.8rem;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.8rem; margin-bottom: 0.7rem; background: var(--surface2);
+    font-size: 0.75rem;
+  }
+  .current-file img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
+  .current-file .cf-info { flex: 1; }
+  .current-file .cf-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .current-file a { color: var(--accent); text-decoration: none; font-size: 0.72rem; }
+  .current-file a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="logo-dot"></span> CadastroSheet</div>
+  <span class="header-tag">Google Sheets + Drive</span>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Registros</div></div>
+    <div class="stat"><div class="stat-value" id="statAvgAge">—</div><div class="stat-label">Média de Idade</div></div>
+    <div class="stat"><div class="stat-value" id="statLast">—</div><div class="stat-label">Último ID</div></div>
+    <div class="stat"><div class="stat-value" id="statFiles">0</div><div class="stat-label">Com Anexo</div></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- CADASTRO -->
+    <div class="card">
+      <div class="card-header">✦ Cadastrar Registro</div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>ID (automático)</label>
+          <div class="id-preview" id="nextIdPreview">Gerado automaticamente</div>
+        </div>
+        <div class="form-group">
+          <label>Nome *</label>
+          <input type="text" id="inputNome" placeholder="Ex: Maria Silva" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Idade *</label>
+          <input type="number" id="inputIdade" placeholder="Ex: 28" min="0" max="150" />
+        </div>
+        <div class="form-group">
+          <label>Imagem / Anexo</label>
+          <div class="upload-area" id="uploadArea"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event,'new')">
+            <input type="file" id="inputFile" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="handleFileSelect(event,'new')" />
+            <div class="upload-icon">📎</div>
+            <div class="upload-text"><strong>Clique ou arraste</strong> um arquivo<br>Imagem, PDF, Word, Excel</div>
+          </div>
+          <div class="file-preview-wrap" id="filePreviewWrap">
+            <button class="btn-remove-file" onclick="removeFile('new')" title="Remover">✕</button>
+          </div>
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressLabel">Preparando...</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btnCadastrar" onclick="cadastrar()">
+          ↑ Salvar na Planilha
+        </button>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="card">
+      <div class="card-header">
+        ◎ Registros
+        <button onclick="loadData()" style="margin-left:auto;background:rgba(255,255,255,0.1);border:none;color:inherit;padding:0.3rem 0.7rem;border-radius:4px;cursor:pointer;font-size:0.7rem;font-family:'DM Mono',monospace">↻ Atualizar</button>
+      </div>
+      <div class="card-body">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Buscar por ID, nome ou idade..." oninput="searchData(this.value)" />
+          <button class="btn-search" onclick="searchData(document.getElementById('searchInput').value)">Buscar</button>
+        </div>
+        <div id="tableArea">
+          <div class="loading"><div class="spinner"></div> Carregando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">✎ Editar Registro <button class="modal-close" onclick="closeEdit()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editRow" />
+      <input type="hidden" id="editId" />
+      <div class="form-group">
+        <label>ID</label>
+        <div class="id-preview" id="editIdPreview">—</div>
+      </div>
+      <div class="form-group">
+        <label>Nome *</label>
+        <input type="text" id="editNome" placeholder="Nome" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>Idade *</label>
+        <input type="number" id="editIdade" placeholder="Idade" min="0" max="150" />
+      </div>
+      <div class="form-group">
+        <label>Imagem / Anexo</label>
+        <div id="editCurrentFile"></div>
+        <div class="upload-area" id="editUploadArea"
+          ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event,'edit')" ondrop="handleDrop(event,'edit')">
+          <input type="file" id="editInputFile" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="handleFileSelect(event,'edit')" />
+          <div class="upload-icon">📎</div>
+          <div class="upload-text"><strong>Substituir arquivo</strong><br>Deixe vazio para manter o atual</div>
+        </div>
+        <div class="file-preview-wrap" id="editFilePreviewWrap">
+          <button class="btn-remove-file" onclick="removeFile('edit')" title="Remover">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEdit()">Cancelar</button>
+      <button class="btn-save" id="btnSaveEdit" onclick="saveEdit()">✓ Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑</div>
+    <div class="confirm-title">Excluir registro?</div>
+    <div class="confirm-msg" id="confirmMsg">Esta ação não pode ser desfeita.</div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-confirm-delete" id="btnConfirmDelete" onclick="confirmDelete()">✕ Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Preview" />
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxVHwMntjBGYjEfKWaUJzIzuS6gAlKWzQ0rbROGYzf-48KpNFgapIK4Nrogq2D2b_qF/exec';
+  let allData = [];
+  let searchTimeout;
+  let pendingDeleteRow = null;
+  let selectedFile = { new: null, edit: null };
+
+  loadData();
+
+  // ===== FILE HANDLING =====
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('dragover');
+  }
+  function handleDragLeave(e) {
+    e.currentTarget.classList.remove('dragover');
+  }
+  function handleDrop(e, ctx) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file, ctx);
+  }
+  function handleFileSelect(e, ctx) {
+    const file = e.target.files[0];
+    if (file) processFile(file, ctx);
+  }
+  function processFile(file, ctx) {
+    if (file.size > 5 * 1024 * 1024) { toast('Arquivo muito grande! Máximo 5MB.', 'error'); return; }
+    selectedFile[ctx] = file;
+    const wrap = document.getElementById(ctx === 'new' ? 'filePreviewWrap' : 'editFilePreviewWrap');
+    wrap.classList.add('active');
+    // Clear previous content (keep remove btn)
+    const removeBtn = wrap.querySelector('.btn-remove-file');
+    wrap.innerHTML = '';
+    wrap.appendChild(removeBtn);
+    if (file.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.className = 'file-preview-img';
+      img.src = URL.createObjectURL(file);
+      wrap.insertBefore(img, removeBtn);
+    } else {
+      const doc = document.createElement('div');
+      doc.className = 'file-preview-doc';
+      doc.innerHTML = `<span class="doc-icon">${getDocIcon(file.name)}</span>
+        <span class="doc-name">${esc(file.name)}</span>
+        <span class="doc-size">${formatSize(file.size)}</span>`;
+      wrap.insertBefore(doc, removeBtn);
+    }
+  }
+  function removeFile(ctx) {
+    selectedFile[ctx] = null;
+    const wrap = document.getElementById(ctx === 'new' ? 'filePreviewWrap' : 'editFilePreviewWrap');
+    wrap.classList.remove('active');
+    const input = document.getElementById(ctx === 'new' ? 'inputFile' : 'editInputFile');
+    input.value = '';
+  }
+  function getDocIcon(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    const icons = { pdf: '📄', doc: '📝', docx: '📝', xls: '📊', xlsx: '📊' };
+    return icons[ext] || '📎';
+  }
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + 'B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + 'KB';
+    return (bytes/(1024*1024)).toFixed(1) + 'MB';
+  }
+
+  async function fileToBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  // ===== LOAD =====
+  async function loadData() {
+    showLoading();
+    try {
+      const res = await fetch(API_URL, { redirect: 'follow' });
+      const json = await res.json();
+      if (json.ok) {
+        allData = json.data || [];
+        renderTable(allData);
+        updateStats(allData);
+        updateNextId(allData);
+      } else throw new Error();
+    } catch(err) {
+      showError('Erro ao carregar dados. Verifique o Apps Script.');
+      console.error(err);
+    }
+  }
+
+  // ===== SEARCH =====
+  function searchData(q) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (!q.trim()) { renderTable(allData); return; }
+      const lower = q.toLowerCase();
+      const filtered = allData.filter(r =>
+        String(r.ID ?? '').toLowerCase().includes(lower) ||
+        String(r.Nome ?? '').toLowerCase().includes(lower) ||
+        String(r.Idade ?? '').toLowerCase().includes(lower)
+      );
+      renderTable(filtered);
+    }, 300);
+  }
+
+  // ===== CADASTRAR =====
+  async function cadastrar() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const idade = document.getElementById('inputIdade').value.trim();
+    if (!nome) { toast('Preencha o Nome!', 'error'); return; }
+    if (!idade || isNaN(idade) || +idade < 0 || +idade > 150) { toast('Informe uma idade válida!', 'error'); return; }
+
+    const btn = document.getElementById('btnCadastrar');
+    btn.disabled = true;
+
+    const payload = { action: 'create', nome, idade: Number(idade) };
+
+    if (selectedFile.new) {
+      btn.innerHTML = '<span class="spinner"></span> Enviando arquivo...';
+      showProgress(true);
+      try {
+        payload.fileData = await fileToBase64(selectedFile.new);
+        payload.fileName = selectedFile.new.name;
+        payload.mimeType = selectedFile.new.type || 'application/octet-stream';
+        setProgress(60, 'Salvando na planilha...');
+      } catch { toast('Erro ao processar arquivo.', 'error'); btn.disabled=false; btn.innerHTML='↑ Salvar na Planilha'; showProgress(false); return; }
+    } else {
+      btn.innerHTML = '<span class="spinner"></span> Salvando...';
+    }
+
+    try {
+      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload) });
+      const json = await res.json();
+      if (json.ok) {
+        setProgress(100, 'Salvo!');
+        setTimeout(() => showProgress(false), 600);
+        toast('✓ Registro #' + json.id + ' cadastrado!', 'success');
+        document.getElementById('inputNome').value = '';
+        document.getElementById('inputIdade').value = '';
+        removeFile('new');
+        document.getElementById('inputNome').focus();
+        await loadData();
+      } else throw new Error();
+    } catch { toast('Erro ao salvar. Verifique o Apps Script.', 'error'); showProgress(false); }
+    finally { btn.disabled=false; btn.innerHTML='↑ Salvar na Planilha'; }
+  }
+
+  function showProgress(show) {
+    const p = document.getElementById('uploadProgress');
+    p.classList.toggle('active', show);
+    if (!show) { document.getElementById('progressFill').style.width='0%'; }
+  }
+  function setProgress(pct, label) {
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = label;
+  }
+
+  // ===== EDIT =====
+  function openEdit(row) {
+    const r = allData.find(x => x._row == row);
+    if (!r) return;
+    selectedFile.edit = null;
+    document.getElementById('editRow').value = r._row;
+    document.getElementById('editId').value = r.ID;
+    document.getElementById('editIdPreview').textContent = '#' + r.ID;
+    document.getElementById('editNome').value = r.Nome ?? '';
+    document.getElementById('editIdade').value = r.Idade ?? '';
+    document.getElementById('editInputFile').value = '';
+    document.getElementById('editFilePreviewWrap').classList.remove('active');
+
+    // Show current file
+    const cf = document.getElementById('editCurrentFile');
+    const fileUrl = r.Anexo || r.fileUrl || r['Arquivo'] || '';
+    const thumbUrl = r.Thumb || r.thumbUrl || r['Thumbnail'] || '';
+    if (fileUrl) {
+      cf.innerHTML = `<div class="current-file">
+        ${thumbUrl ? `<img src="${esc(thumbUrl)}" onerror="this.style.display='none'" />` : `<span style="font-size:1.5rem">${getDocIcon(fileUrl)}</span>`}
+        <div class="cf-info">
+          <div class="cf-label">Arquivo atual</div>
+          <a href="${esc(fileUrl)}" target="_blank">Ver / baixar ↗</a>
+        </div>
+      </div>`;
+    } else {
+      cf.innerHTML = '';
+    }
+
+    document.getElementById('editModal').classList.add('active');
+    setTimeout(() => document.getElementById('editNome').focus(), 100);
+  }
+  function closeEdit() { document.getElementById('editModal').classList.remove('active'); }
+
+  async function saveEdit() {
+    const _row = document.getElementById('editRow').value;
+    const id = document.getElementById('editId').value;
+    const nome = document.getElementById('editNome').value.trim();
+    const idade = document.getElementById('editIdade').value.trim();
+    if (!nome) { toast('Preencha o Nome!', 'error'); return; }
+    if (!idade || isNaN(idade) || +idade < 0 || +idade > 150) { toast('Informe uma idade válida!', 'error'); return; }
+
+    const btn = document.getElementById('btnSaveEdit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+    const payload = { action: 'update', _row: Number(_row), id, nome, idade: Number(idade) };
+
+    if (selectedFile.edit) {
+      try {
+        payload.fileData = await fileToBase64(selectedFile.edit);
+        payload.fileName = selectedFile.edit.name;
+        payload.mimeType = selectedFile.edit.type || 'application/octet-stream';
+      } catch { toast('Erro ao processar arquivo.', 'error'); btn.disabled=false; btn.innerHTML='✓ Salvar Alterações'; return; }
+    }
+
+    try {
+      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload) });
+      const json = await res.json();
+      if (json.ok) {
+        toast('✓ Registro atualizado!', 'success');
+        closeEdit();
+        await loadData();
+      } else throw new Error();
+    } catch { toast('Erro ao atualizar.', 'error'); }
+    finally { btn.disabled=false; btn.innerHTML='✓ Salvar Alterações'; }
+  }
+
+  // ===== DELETE =====
+  function openConfirm(row) {
+    const r = allData.find(x => x._row == row);
+    if (!r) return;
+    pendingDeleteRow = row;
+    document.getElementById('confirmMsg').textContent =
+      'Você está prestes a excluir o registro de ' + (r.Nome || '#' + r.ID) + '. Esta ação não pode ser desfeita.';
+    document.getElementById('confirmModal').classList.add('active');
+  }
+  function closeConfirm() { document.getElementById('confirmModal').classList.remove('active'); pendingDeleteRow = null; }
+
+  async function confirmDelete() {
+    if (!pendingDeleteRow) return;
+    const btn = document.getElementById('btnConfirmDelete');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST', redirect: 'follow',
+        body: JSON.stringify({ action: 'delete', _row: Number(pendingDeleteRow) })
+      });
+      const json = await res.json();
+      if (json.ok) { toast('✓ Registro excluído!', 'success'); closeConfirm(); await loadData(); }
+      else throw new Error();
+    } catch { toast('Erro ao excluir.', 'error'); }
+    finally { btn.disabled=false; btn.innerHTML='✕ Excluir'; }
+  }
+
+  // ===== LIGHTBOX =====
+  function openLightbox(url) {
+    document.getElementById('lightboxImg').src = url;
+    document.getElementById('lightbox').classList.add('active');
+  }
+  function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+
+  // ===== RENDER TABLE =====
+  function renderTable(data) {
+    const area = document.getElementById('tableArea');
+    if (!data || data.length === 0) {
+      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Nenhum registro encontrado</p></div>';
+      return;
+    }
+    area.innerHTML = '<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Anexo</th><th>Nome</th><th>Idade</th><th>Ações</th></tr></thead><tbody>' +
+      data.map(r => {
+        const fileUrl = r.Anexo || r['Arquivo'] || '';
+        const thumbUrl = r.Thumb || r['Thumbnail'] || '';
+        let thumbHtml = '';
+        if (thumbUrl) {
+          thumbHtml = `<div class="thumb-wrap"><img src="${esc(thumbUrl)}" alt="preview" onclick="openLightbox('${esc(thumbUrl.replace('w200','w800'))}')" onerror="this.parentElement.innerHTML='<div class=\\"thumb-doc\\" onclick=\\"window.open(\\\\\'${esc(fileUrl)}\\\\\',\\\\\'_blank\\\\\')\\">📄</div>'" /></div>`;
+        } else if (fileUrl) {
+          thumbHtml = `<div class="thumb-doc" onclick="window.open('${esc(fileUrl)}','_blank')" title="Abrir arquivo">${getDocIcon(fileUrl)}</div>`;
+        } else {
+          thumbHtml = `<div class="thumb-empty">+</div>`;
+        }
+        return `<tr>
+          <td><span class="id-badge">#${esc(r.ID)}</span></td>
+          <td>${thumbHtml}</td>
+          <td>${esc(String(r.Nome ?? '—'))}</td>
+          <td><span class="age-chip">${esc(String(r.Idade ?? '—'))} anos</span></td>
+          <td><div class="actions">
+            <button class="btn-icon btn-edit" onclick="openEdit(${r._row})" title="Editar">✎</button>
+            <button class="btn-icon btn-delete" onclick="openConfirm(${r._row})" title="Excluir">✕</button>
+          </div></td>
+        </tr>`;
+      }).join('') +
+      '</tbody></table></div>';
+  }
+
+  function showLoading() {
+    document.getElementById('tableArea').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  }
+  function showError(msg) {
+    document.getElementById('tableArea').innerHTML = '<div class="empty-state"><div class="icon">⚠</div><p>' + msg + '</p></div>';
+  }
+
+  function updateStats(data) {
+    document.getElementById('statsRow').style.display = 'flex';
+    document.getElementById('statTotal').textContent = data.length;
+    const ages = data.map(r => Number(r.Idade)).filter(a => !isNaN(a) && a > 0);
+    document.getElementById('statAvgAge').textContent = ages.length ? Math.round(ages.reduce((a,b)=>a+b,0)/ages.length) : '—';
+    document.getElementById('statLast').textContent = data.length ? (data[data.length-1].ID ?? '—') : '—';
+    document.getElementById('statFiles').textContent = data.filter(r => r.Anexo || r['Arquivo']).length;
+  }
+
+  function updateNextId(data) {
+    const maxId = data.reduce((max, r) => Math.max(max, Number(r.ID) || 0), 0);
+    document.getElementById('nextIdPreview').textContent = '#' + (maxId + 1) + ' (próximo)';
+  }
+
+  function toast(msg, type) {
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type || 'success');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(() => { el.style.cssText += 'opacity:0;transform:translateX(20px);transition:0.3s'; setTimeout(() => el.remove(), 300); }, 3500);
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeEdit(); closeConfirm(); closeLightbox(); }
+    if (e.key === 'Enter') {
+      if (['inputNome','inputIdade'].includes(document.activeElement.id)) cadastrar();
+      if (['editNome','editIdade'].includes(document.activeElement.id)) saveEdit();
+    }
+  });
+  document.getElementById('editModal').addEventListener('click', e => { if(e.target===document.getElementById('editModal')) closeEdit(); });
+  document.getElementById('confirmModal').addEventListener('click', e => { if(e.target===document.getElementById('confirmModal')) closeConfirm(); });
+</script>
+</body>
+</html>
