@@ -323,6 +323,31 @@
   .current-file .cf-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .current-file a { color: var(--accent); text-decoration: none; font-size: 0.72rem; }
   .current-file a:hover { text-decoration: underline; }
+
+  /* WORKER BANNER */
+  .worker-banner {
+    background: var(--ink); color: var(--bg);
+    border-radius: 12px; padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem; display: none;
+    align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .worker-banner.show { display: flex; animation: fadeUp 0.4s ease; }
+  .worker-banner p { font-size: 0.75rem; line-height: 1.5; flex: 1; min-width: 200px; }
+  .worker-banner p strong { color: #f39c12; }
+  .worker-banner input {
+    flex: 2; min-width: 200px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; padding: 0.6rem 1rem; color: var(--bg);
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; outline: none;
+  }
+  .worker-banner input::placeholder { color: rgba(245,240,232,0.3); }
+  .worker-banner button {
+    background: #f39c12; color: var(--ink); border: none; border-radius: 8px;
+    padding: 0.6rem 1.2rem; font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .worker-banner button:hover { background: #e67e22; }
+
 </style>
 </head>
 <body>
@@ -333,6 +358,15 @@
 </header>
 
 <div class="container">
+
+
+  <!-- WORKER BANNER -->
+  <div class="worker-banner show" id="workerBanner">
+    <p>⚡ <strong>Configure o Cloudflare Worker</strong> para funcionar no GitHub Pages.<br>
+    Veja o arquivo <code>cloudflare-worker.js</code> para instruções. Depois cole a URL aqui:</p>
+    <input type="text" id="workerUrlInput" placeholder="https://meu-proxy.SEU-USER.workers.dev" />
+    <button onclick="saveWorkerUrl()">✓ Salvar</button>
+  </div>
 
   <!-- STATS -->
   <div class="stats-row" id="statsRow" style="display:none">
@@ -463,13 +497,24 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxVHwMntjBGYjEfKWaUJzIzuS6gAlKWzQ0rbROGYzf-48KpNFgapIK4Nrogq2D2b_qF/exec';
+  let API_URL = 'https://gentle-sunset-2844.karleandsonj.workers.dev/';
   let allData = [];
   let searchTimeout;
   let pendingDeleteRow = null;
   let selectedFile = { new: null, edit: null };
 
   loadData();
+
+
+  function saveWorkerUrl() {
+    const url = document.getElementById('workerUrlInput').value.trim();
+    if (!url || !url.startsWith('http')) { toast('URL inválida!', 'error'); return; }
+    localStorage.setItem('worker_url', url);
+    API_URL = url;
+    document.getElementById('workerBanner').classList.remove('show');
+    toast('✓ Worker configurado! Carregando...', 'success');
+    loadData();
+  }
 
   // ===== FILE HANDLING =====
   function handleDragOver(e) {
