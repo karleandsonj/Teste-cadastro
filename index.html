@@ -1041,7 +1041,16 @@ function ok(data) {
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxVHwMntjBGYjEfKWaUJzIzuS6gAlKWzQ0rbROGYzf-48KpNFgapIK4Nrogq2D2b_qF/exec';
+  // Auto-detect URL: works both standalone and hosted on Apps Script
+  const API_URL = (() => {
+    const url = window.location.href;
+    // If hosted on Apps Script (script.google.com), use current URL
+    if (url.includes('script.google.com') || url.includes('googleusercontent.com')) {
+      return url.split('?')[0];
+    }
+    // Fallback: your deployed Apps Script URL
+    return 'https://script.google.com/macros/s/AKfycbxVHwMntjBGYjEfKWaUJzIzuS6gAlKWzQ0rbROGYzf-48KpNFgapIK4Nrogq2D2b_qF/exec';
+  })();
 
   let allData = [];
   let searchTimeout;
@@ -1067,7 +1076,9 @@ function ok(data) {
   async function loadData() {
     showLoading();
     try {
-      const res = await fetch(API_URL, { redirect: 'follow' });
+      const res = await fetch(API_URL + '?action=read', {
+        redirect: 'follow', credentials: 'omit'
+      });
       const json = await res.json();
       if (json.ok) {
         allData = json.data || [];
@@ -1076,7 +1087,7 @@ function ok(data) {
         updateNextId(allData);
       } else throw new Error();
     } catch (err) {
-      showError('Erro ao carregar. Verifique se o Apps Script foi atualizado e reimplantado com nova versão.');
+      showError('Erro ao carregar. Verifique as permissões da implantação (Qualquer pessoa) e reimplante com nova versão.');
     }
   }
 
@@ -1219,7 +1230,7 @@ function ok(data) {
       try {
         const base64 = await fileToBase64(entry.file);
         const res = await fetch(API_URL, {
-          method: 'POST', redirect: 'follow',
+          method: 'POST', redirect: 'follow', credentials: 'omit',
           body: JSON.stringify({
             action: 'upload',
             file: { name: entry.name, mimeType: entry.type || 'application/octet-stream', data: base64 }
@@ -1286,7 +1297,7 @@ function ok(data) {
       const attachments = getUploadedAttachments(newAttachments);
 
       const res = await fetch(API_URL, {
-        method: 'POST', redirect: 'follow',
+        method: 'POST', redirect: 'follow', credentials: 'omit',
         body: JSON.stringify({ action: 'create', nome, idade: Number(idade), attachments })
       });
       const json = await res.json();
@@ -1414,7 +1425,7 @@ function ok(data) {
       const allAttachments = [...editCurrentAttachments, ...newUploaded];
 
       const res = await fetch(API_URL, {
-        method: 'POST', redirect: 'follow',
+        method: 'POST', redirect: 'follow', credentials: 'omit',
         body: JSON.stringify({ action: 'update', _row: Number(_row), nome, idade: Number(idade), attachments: allAttachments })
       });
       const json = await res.json();
@@ -1449,7 +1460,7 @@ function ok(data) {
     btn.innerHTML = '<span class="spinner"></span>';
     try {
       const res = await fetch(API_URL, {
-        method: 'POST', redirect: 'follow',
+        method: 'POST', redirect: 'follow', credentials: 'omit',
         body: JSON.stringify({ action: 'delete', _row: Number(pendingDeleteRow) })
       });
       const json = await res.json();
